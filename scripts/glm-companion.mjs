@@ -61,6 +61,7 @@ import {
 } from "./lib/render.mjs";
 import { resolveWorkspaceRoot } from "./lib/workspace.mjs";
 import { terminateProcessTree } from "./lib/process.mjs";
+import { createPiClient } from "./lib/pi-rpc.mjs";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 
@@ -398,6 +399,59 @@ async function cmdTaskWorker(flags, positional) {
   }
 }
 
+// ─── code (Pi RPC) ──────────────────────────────────────────────────
+
+async function cmdCode(flags, positional) {
+  const task = positional.join(" ");
+  if (!task) {
+    console.error("Error: No task provided.\nUsage: /glm:code <task>");
+    process.exit(1);
+  }
+
+  const model = normalizeRequestedModel(flags.model);
+  console.error(`[glm:code] Starting Pi with GLM (${model})...`);
+
+  const pi = createPiClient({
+    provider: "glm",
+    model: model,
+    cwd: process.cwd(),
+  });
+
+  try {
+    await pi.start();
+    console.error("[glm:code] Pi started. Sending task...");
+
+    const events = await pi.promptAndWait(task, 300_000);
+
+    // Extract text from events
+    const textParts = [];
+    for (const event of events) {
+      if (event.type === "text_delta") {
+        textParts.push(event.text || event.delta || "");
+      }
+      if (event.type === "tool_start") {
+        console.error(`[glm:code] Tool: ${event.tool} ${event.args ? JSON.stringify(event.args).slice(0, 80) : ""}`);
+      }
+    }
+
+    // Get final assistant text
+    let finalText;
+    try {
+      finalText = await pi.getLastAssistantText();
+    } catch {
+      finalText = textParts.join("") || "(No output captured)";
+    }
+
+    console.log(finalText);
+  } catch (err) {
+    console.error(`[glm:code] Error: ${err.message}`);
+    if (pi.getStderr()) console.error(`[glm:code] stderr: ${pi.getStderr().slice(0, 500)}`);
+    process.exit(1);
+  } finally {
+    await pi.stop();
+  }
+}
+
 // ─── main ───────────────────────────────────────────────────────────
 
 async function main() {
@@ -415,6 +469,7 @@ async function main() {
     case "status":      await cmdStatus(flags, positional); break;
     case "result":      await cmdResult(flags, positional); break;
     case "cancel":      await cmdCancel(flags, positional); break;
+    case "code":        await cmdCode(flags, positional); break;
     case "task-worker": await cmdTaskWorker(flags, positional); break;
     default:
       console.error(`Unknown subcommand: ${subcommand}`);
