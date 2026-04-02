@@ -1,0 +1,8 @@
+{
+  "name": "glm",
+  "version": "1.0.0",
+  "description": "Use Zhipu AI's GLM-4 from Claude Code for reasoning, code review, and structured task delegation.",
+  "author": {
+    "name": "Mark"
+  }
+}
