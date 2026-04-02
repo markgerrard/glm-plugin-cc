@@ -411,10 +411,13 @@ async function cmdCode(flags, positional) {
   const model = normalizeRequestedModel(flags.model);
   console.error(`[glm:code] Starting Pi with GLM (${model})...`);
 
+  const workDir = resolveWorkspaceRoot(process.cwd());
+  console.error(`[glm:code] Working directory: ${workDir}`);
+
   const pi = createPiClient({
     provider: "glm",
     model: model,
-    cwd: process.cwd(),
+    cwd: workDir,
   });
 
   try {
