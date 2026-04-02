@@ -7,14 +7,17 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const API_BASE = "https://open.bigmodel.cn/api/paas/v4";
+const API_BASE = "https://api.z.ai/api/coding/paas/v4";
 const DEFAULT_TIMEOUT_MS = 120_000; // 2 minutes
-const DEFAULT_MODEL = "glm-4-plus";
+const DEFAULT_MODEL = "glm-4.5-flash";
 
 const MODEL_ALIASES = new Map([
-  ["plus", "glm-4-plus"],
-  ["flash", "glm-4-flash"],
-  ["4", "glm-4"],
+  ["5", "glm-5"],
+  ["turbo", "glm-5-turbo"],
+  ["4.7", "glm-4.7"],
+  ["4.5", "glm-4.5"],
+  ["air", "glm-4.5-air"],
+  ["flash", "glm-4.5-flash"],
 ]);
 
 /**
