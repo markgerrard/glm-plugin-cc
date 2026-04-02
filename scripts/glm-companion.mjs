@@ -225,7 +225,9 @@ async function runCommand(kind, flags, positional, promptBuilder) {
     return;
   }
 
-  const isBackground = flags.background === true;
+  // task and review auto-background unless --wait is explicitly passed
+  const autoBackground = (kind === "task" || kind === "review") && flags.wait !== true;
+  const isBackground = flags.background === true || autoBackground;
 
   if (isBackground) {
     const jobId = generateJobId("glm");

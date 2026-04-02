@@ -8,7 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const API_BASE = "https://api.z.ai/api/coding/paas/v4";
-const DEFAULT_TIMEOUT_MS = 120_000; // 2 minutes
+const DEFAULT_TIMEOUT_MS = 300_000; // 5 minutes
 const DEFAULT_MODEL = "glm-5-turbo";
 
 const MODEL_ALIASES = new Map([
